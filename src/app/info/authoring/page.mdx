@@ -1,0 +1,56 @@
+# Authoring Posts
+
+Learn how to create and manage newsletter posts in the admin interface.
+
+## Creating New Posts
+
+To create a new post, navigate to the **Admin Dashboard** → **Posts** → **Create a post**.
+
+### Required Fields
+
+- **Title**: The main headline of your post
+- **Author**: Select from available authors
+- **Image URL**: Choose from predefined image options or provide a custom URL
+
+### Optional Fields
+
+- **Excerpt**: A short summary (max 280 characters) shown in post previews
+- **Content**: The main body text of your post
+- **Schedule Publish At**: Set a future date and time for automatic publication
+
+## Editing Existing Posts
+
+1. Go to **Admin Dashboard** → **Posts**
+2. Find your post in the list
+3. Click **Edit** to modify the post
+4. Update any fields as needed
+5. Save changes
+
+## Technical Details
+
+### Post Status
+- **Draft**: Not published, not visible to public
+- **Published**: Live and visible to all readers
+- **Scheduled**: Set to publish at a future time
+
+### Scheduling
+- Set a future publication date and time
+- Posts can be saved as drafts and scheduled later
+- Once scheduled, posts will automatically publish and notify subscribers
+
+### Form Validation
+- Title is required and must be non-empty
+- Author selection is mandatory
+- Image URL must be a valid URL
+- Excerpt has a 280-character limit
+
+### Data Storage
+- Posts are stored in PostgreSQL via Prisma ORM
+- All changes are tracked with timestamps
+- Scheduled posts create background jobs for automatic publishing
+
+### Server Actions
+The post form uses Next.js Server Actions for:
+- Form submission handling
+- Database operations
+- Automatic redirects after successful operations

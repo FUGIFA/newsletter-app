@@ -1,0 +1,77 @@
+# Subscribing to the Newsletter
+
+Learn how readers can subscribe to receive email notifications when new posts are published.
+
+## Subscription Process
+
+### How to Subscribe
+
+1. **Navigate to Subscribe Page**: Click "Subscribe" from the main navigation or visit `/subscribe`
+2. **Fill Out Form**: Enter your email address and name
+3. **Submit**: Click the "Subscribe" button
+4. **Confirmation**: You'll be redirected to the posts page and receive a welcome email
+
+## Email Notifications
+
+### Welcome Email
+Upon successful subscription, you'll receive:
+- **Welcome Message**: Confirmation of your subscription
+- **App Information**: Details about the newsletter
+- **Site Link**: Direct link to visit the website
+
+### New Post Notifications
+When new posts are published, subscribers receive:
+- **Post Announcement**: Notification of new content
+- **Site Link**: Direct link to read the latest posts
+
+## Subscriber Management View
+Administrators can view all subscribers at:
+**Admin Dashboard** → **Subscribers**
+
+## Technical Implementation
+
+### Form Processing
+The subscription form uses Next.js Server Actions:
+```typescript
+export async function createSubscriber(formData: FormData) {
+  const email = getStr(formData, "email") ?? "";
+  const name = getStr(formData, "name") ?? "";
+  
+  await prisma.subscriber.create({ data: { email, name } });
+  await new EmailService().send(email, "Welcome");
+  
+  redirect("/posts");
+}
+```
+
+### Database Schema
+Subscribers are stored with the following structure:
+```prisma
+model Subscriber {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  name        String?
+  confirmedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+```
+
+### Email Integration
+- **SendGrid Service**: Professional email delivery
+- **Template System**: Consistent email design
+
+
+## Future Enhancements
+
+### Planned Features
+- **Email Verification**: Double opt-in confirmation
+- **Subscription Preferences**: Choose notification frequency
+- **Unsubscribe Management**: Self-service unsubscribe options
+- **Segmentation**: Group subscribers by interests
+- **Analytics**: Track subscription and engagement metrics
+
+### Integration Opportunities
+- **Social Media**: Share subscription links
+- **API Endpoints**: Programmatic subscription management
+- **Webhook Support**: Real-time subscription events

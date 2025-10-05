@@ -1,0 +1,65 @@
+# Reading Posts
+
+Discover how readers can browse and view published newsletter posts.
+
+## Public Post View
+
+The reading experience is designed for newsletter subscribers and casual visitors to browse published content in a clean, accessible format.
+
+### Accessing Posts
+
+Navigate to the **Posts** section from the main navigation or visit `/posts` directly.
+
+## Design System
+
+### Visual Elements
+- **Mantine Components**: Built with Mantine UI for consistency
+- **Tailwind CSS**: Utility-first styling approach
+- **CSS Modules**: Scoped styling for post cards
+- **Theme Support**: Dark and light mode compatibility
+
+### Layout Structure
+```
+Posts Page Layout:
+├── Container (responsive padding)
+├── SimpleGrid (responsive columns)
+│   ├── Post Card 1
+│   │   ├── AspectRatio (16:9)
+│   │   │   └── Image
+│   │   ├── Date
+│   │   └── Title
+│   └── Post Card 2...
+```
+
+## Content Filtering
+
+### Published Posts Only
+- Only posts with `published: true` are displayed
+- Draft posts are hidden from public view
+- Scheduled posts appear only after their publish time
+
+### Database Query
+The posts page uses an optimized Prisma query:
+```typescript
+const posts = await prisma.post.findMany({
+  where: { published: true }
+});
+```
+
+## Future Enhancements
+
+### Planned Features
+- **Post Categories**: Filter posts by topic or category
+- **Search Functionality**: Full-text search across post content
+- **Reading Progress**: Track reading progress for long posts
+- **Social Sharing**: Share posts on social media platforms
+
+## Technical Implementation
+
+### Component Structure
+- **Server Component**: Posts page is a server component for SEO
+- **Database Integration**: Direct Prisma queries for data fetching
+
+### Styling Approach
+- **CSS Modules**: Scoped styles for post cards
+- **Theme Integration**: Works with both light and dark themes

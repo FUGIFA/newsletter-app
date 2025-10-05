@@ -1,0 +1,131 @@
+# Scheduling Posts
+
+Learn how to schedule posts for future publication with automatic email notifications to subscribers.
+
+## Post Scheduling Overview
+
+The newsletter system includes a scheduling feature that allows you to:
+- Set posts to publish at specific future dates and times
+- Automatically notify all subscribers when posts go live
+- Manage scheduled posts through the admin interface
+
+## How Scheduling Works
+
+### Setting Up Scheduled Posts
+
+1. **Create or Edit Post**: Go to the post creation/editing form
+2. **Set Publish Date**: Use the "Schedule publish at" date/time picker
+3. **Save Post**: The system creates a background job for the scheduled time
+4. **Automatic Publishing**: The post publishes automatically at the specified time
+5. **Email Notifications**: All subscribers receive notification emails
+
+### Scheduling Interface
+
+The post form includes a **DateTimePicker** component that:
+- Allows selection of future dates and times
+- Prevents scheduling in the past (for new posts)
+## Technical Implementation
+
+### Background Job System
+
+The scheduling system uses `node-schedule` for reliable background job processing:
+
+```typescript
+export class PostScheduler {
+  public static async schedule(
+    postId: string,
+    publishAt: Date | string | null
+  ) {
+    this.cancel(postId);
+    
+    const schedulerDate = toDateOrNull(publishAt);
+    
+    if (schedulerDate) {
+      await this.handleUpsert(postId, schedulerDate);
+      await this.handleScheduling(postId, schedulerDate);
+    }
+  }
+}
+```
+
+### Database Integration
+
+Scheduled jobs are tracked in the database:
+
+```prisma
+model ScheduledJob {
+  id         String    @id @default(cuid())
+  postId     String    @unique
+  runAt      DateTime
+  status     String    @default("scheduled")
+  executedAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+```
+
+### Job Persistence
+
+The system automatically restores scheduled jobs on server startup **(Currently not implemented)**:
+
+```typescript
+public static async restoreScheduledJobs() {
+  const now = new Date();
+  
+  const jobs = await prisma.scheduledJob.findMany({
+    where: { status: "scheduled" }
+  });
+  
+  for (const job of jobs) {
+    if (job.runAt <= now) {
+      // Execute immediately if past due
+      await this.executeJob(job);
+    } else {
+      // Schedule for future execution
+      schedule.scheduleJob(job.postId, job.runAt, async () => {
+        await this.executeJob(job);
+      });
+    }
+  }
+}
+```
+
+## Email Integration
+
+### Automatic Notifications
+
+When a scheduled post **publishes**, the system:
+1. Updates the post status to published
+2. Sets the `publishedAt` timestamp
+3. Retrieves all active subscribers
+4. Sends notification emails to each subscriber
+5. Updates the job status to "executed"
+
+### Email Service Integration
+
+```typescript
+private static async handleEmailing(postId: string) {
+  const subscribers = await prisma.subscriber.findMany();
+  const emailService = new EmailService();
+  
+  for (const subscriber of subscribers) {
+    await emailService.send(subscriber.email, "NewPost");
+  }
+}
+```
+
+## Future Enhancements
+
+### Planned Features
+- **Bulk Scheduling**: Schedule multiple posts at once
+- **Recurring Posts**: Set up regular publication schedules
+- **Time Zone Support**: Schedule in different time zones
+- **Advanced Notifications**: Customize notification timing
+
+### Integration Opportunities
+- **Calendar Integration**: Sync with external calendars
+- **Analytics Integration**: Track engagement by publish time
+- **Social Media**: Auto-post to social platforms
